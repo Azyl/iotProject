@@ -2,6 +2,8 @@ package net.metro.iot.monitoring.iotMonitoring.controller;
 
 import java.util.List;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,11 +14,24 @@ import net.metro.iot.monitoring.iotMonitoring.service.SensorConfigService;
 @RequestMapping("/sensor_config")
 public class SensorConfigController {
 
+    private final MeterRegistry registry;
+
+    private final SensorConfigService sensorConfigService;
+
     @Autowired
-    private SensorConfigService sensorConfigService;
+    public SensorConfigController(MeterRegistry registry, SensorConfigService sensorConfigService) {
+        this.registry = registry;
+        this.sensorConfigService = sensorConfigService;
+    }
 
     @RequestMapping(value = "/", method = RequestMethod.POST)
     public void save(@RequestBody SensorConfigDto sensorConfigDto) {
+
+        Counter.builder("iot.sensorConfigService.retrieveALLCounter")
+                //.tags("countryCode", countryCode, "salesLine", salesLine, "storeNumber", storeNumber.toString())
+                .register(registry)
+                .increment();
+
         sensorConfigService.save(sensorConfigDto);
     }
 
